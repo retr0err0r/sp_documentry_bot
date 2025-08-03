@@ -1,11 +1,11 @@
 import os
+from contextlib import contextmanager
 
 import psycopg2
 from dotenv import load_dotenv
 from psycopg2 import sql
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from utils.logger import add_log
 
@@ -16,7 +16,8 @@ SessionLocal = sessionmaker(autoflush=True, bind=engine)
 Base = declarative_base()
 
 
-def session():
+@contextmanager
+def get_session():
     ss = SessionLocal()
     try:
         yield ss
@@ -30,8 +31,8 @@ def init_db():
 
 
 def create_database_if_not_exists(database_url):
-    db_url = database_url.rsplit("/", 1)[0] + "/postgres"
     database_name = database_url.split("/")[-1]
+    db_url = database_url.rsplit("/", 1)[0] + "/postgres"
     conn = psycopg2.connect(db_url)
     try:
         conn.autocommit = True

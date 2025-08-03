@@ -1,13 +1,13 @@
-from sqlalchemy import ForeignKey, Integer, Text, Date, Numeric, TIMESTAMP, Column, String
+from sqlalchemy import ForeignKey, Integer, Text, Date, Numeric, Column, String
 from sqlalchemy.orm import relationship
 
-from base import Base
+from models.base import Base
 
 
 class Document(Base):
     __tablename__ = "documents"
     id = Column(Integer, primary_key=True, index=True)
-    client_id = Column(ForeignKey("clients.id"))
+    client_id = Column(ForeignKey("users.id"))
 
     cotej_number = Column(Numeric)
     booking_number = Column(Numeric)
@@ -33,4 +33,5 @@ class Document(Base):
         return (
             f"<Document(cotej_number={self.cotej_number}, booking_number={self.booking_number},\n"
             f"\tclient_id={self.client_id}),\n"
-            f"\tshipping_company={self.shipping_company}, cargo_owner={self.cargo_owner})>")
+            f"\tshipping_company={self.shipping_company}, cargo_owner={self.cargo_owner})>"
+        )

@@ -13,7 +13,6 @@ from telebot import TeleBot
 from utils.logger import add_log
 
 load_dotenv(os.getenv("TG_BOT_ENV"))
-tehran_tz = ZoneInfo("Asia/Tehran")
 
 
 def backup_command(backup_file, db_name, db_user):
@@ -36,7 +35,7 @@ def backup_database(bot):
     backup_dir = "backups"
     if not os.path.exists(backup_dir):
         os.makedirs(backup_dir)
-    timestamp = dt.now(tehran_tz).strftime("%Y%m%d_%H%M%S")
+    timestamp = dt.now(ZoneInfo("Asia/Tehran")).strftime("%Y%m%d_%H%M%S")
     bot_username = bot.get_me().username
     backup_file = os.path.join(backup_dir, f"{bot_username}_{timestamp}.sql")
     command = backup_command(backup_file, database['name'], database['username'])
@@ -70,9 +69,9 @@ def run_scheduler():
 
 
 def runner(bot):
-    add_log(f"Bot Started at {dt.now(tehran_tz).strftime('%Y-%m-%d %H:%M:%S')}")
+    add_log(f"Bot Started at {dt.now(ZoneInfo("Asia/Tehran")).strftime('%Y-%m-%d %H:%M:%S')}")
     threading.Thread(target=run_scheduler, daemon=True).start()
     schedule.every(12).hours.do(job_func=backup_database, bot=bot)
     print("Bot is polling...")
     bot.infinity_polling()
-    add_log(f"Bot Stopped at {dt.now(tehran_tz).strftime('%Y-%m-%d %H:%M:%S')}")
+    add_log(f"Bot Stopped at {dt.now(ZoneInfo("Asia/Tehran")).strftime('%Y-%m-%d %H:%M:%S')}")
