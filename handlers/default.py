@@ -1,19 +1,25 @@
-def register_handlers(bot):
+from telebot.types import BotCommand, Message
+
+from config import commands_list
+from functions.default import process_start
+from utils.wrappers import check_username
+
+
+def add_default_commands_to_bot():
+    commands_list.extend(
+        [
+            BotCommand(command="/start", description="🤖 start the bot")
+        ]
+    )
+
+
+def register_start(bot):
     @bot.message_handler(commands=["start"])
+    @check_username()
     def handle_start(message: Message):
-        tg_id = str(message.from_user.id)
-        username = message.from_user.username
+        process_start(bot, message)
 
-        session = get_session()
-        with session() as db:
-            user = db.query(User).filter_by(tg_id=tg_id).first()
 
-            if user:
-                if not user.role:
-                    bot.reply_to(message, "برای تعیین نقش، لطفاً کلید مخصوص خود را وارد کنید:")
-                    bot.register_next_step_handler(message, ask_for_role, db, user)
-                else:
-                    bot.reply_to(message, f"خوش آمدید {user.name}! نقش شما: {user.role}")
-            else:
-                # کاربر هنوز توسط ادمین ثبت نشده
-                bot.reply_to(message, "شما هنوز توسط مدیر ثبت نشده‌اید. لطفاً با مدیر تماس بگیرید.")
+def default_commands_handler(bot):
+    add_default_commands_to_bot()
+    register_start(bot)

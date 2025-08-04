@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text, Numeric, DateTime, String, func
+
 from models.base import Base
 
 
@@ -7,7 +8,7 @@ class Payment(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(ForeignKey("users.id"), nullable=False)
-    type = Column(String, nullable=False)  # "debit" = هزینه، "credit" = پرداخت
+    type = Column(String, nullable=False)
     amount = Column(Numeric, nullable=False)
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

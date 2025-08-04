@@ -1,23 +1,31 @@
-def register_handlers(bot):
+from telebot.types import BotCommand, Message
+
+from config import commands_list
+from functions.payment import process_add_payment, process_balance
+
+
+def add_payment_commands_to_bot():
+    commands_list.extend(
+        [
+            BotCommand(command="/add_payment", description="💵 Add new Payment"),
+            BotCommand(command="/balance", description="💵 Get Client Balance")
+        ]
+    )
+
+
+def register_add_payment(bot):
     @bot.message_handler(commands=["add_payment"])
     def handle_add_payment(message: Message):
-        if not is_admin(str(message.from_user.id)):
-            return bot.reply_to(message, "فقط ادمین‌ها مجاز به ثبت پرداخت هستند.")
-        bot.reply_to(message, "یوزرنیم مشتری را وارد کنید:")
-        payment_context[message.chat.id] = {}
-        bot.register_next_step_handler(message, get_username)
+        process_add_payment(message, bot)
 
 
-def register_handlers(bot):
+def register_balance(bot):
     @bot.message_handler(commands=["balance"])
     def handle_balance(message: Message):
-        session = get_session()
-        with session() as db:
-            if is_admin(str(message.from_user.id)):
-                bot.reply_to(message, "یوزرنیم مشتری را وارد کنید:")
-                bot.register_next_step_handler(message, balance_for_admin)
-            else:
-                user = db.query(User).filter_by(tg_id=str(message.from_user.id)).first()
-                if not user:
-                    return bot.reply_to(message, "شما ثبت نشده‌اید.")
-                return show_balance(bot, message.chat.id, user.id)
+        process_balance(message, bot)
+
+
+def payment_commands_handler(bot):
+    add_payment_commands_to_bot()
+    register_add_payment(bot)
+    register_balance(bot)

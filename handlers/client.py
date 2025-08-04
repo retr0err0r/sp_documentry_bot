@@ -1,18 +1,35 @@
-def register_handlers(bot):
+from telebot.types import BotCommand, Message
+
+from config import commands_list
+from functions.client import process_add_client, process_client_stats
+from utils.wrappers import check_username, check_admin
+
+
+def add_client_commands_to_bot():
+    commands_list.extend(
+        [
+            BotCommand(command="/add_client", description="👔 Add new Client"),
+            BotCommand(command="/client_stats", description="👔 Get Client Stats")
+        ]
+    )
+
+
+def register_add_client(bot):
     @bot.message_handler(commands=['add_client'])
-    def start_add_client(message: Message):
-        if not is_admin(str(message.from_user.id)):
-            return bot.reply_to(message, "شما ادمین نیستید.")
-        bot.reply_to(message, "نام مشتری را وارد کنید:")
-        user_register_data[message.chat.id] = {}
-        bot.register_next_step_handler(message, get_name)
+    @check_username()
+    @check_admin(bot)
+    def handle_add_client(message: Message):
+        process_add_client(message, bot)
 
 
-def register_handlers(bot):
+def register_client_stats(bot):
     @bot.message_handler(commands=["client_stats"])
+    @check_username()
     def handle_client_stats(message: Message):
-        if not is_admin(str(message.from_user.id)):
-            return bot.reply_to(message, "فقط ادمین‌ها مجاز به مشاهده آمار هستند.")
-        bot.reply_to(message, "یوزرنیم مشتری را وارد کنید:")
-        bot.register_next_step_handler(message, process_username)
+        process_client_stats(message, bot)
 
+
+def client_commands_handler(bot):
+    add_client_commands_to_bot()
+    register_add_client(bot)
+    register_client_stats(bot)

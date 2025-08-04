@@ -17,5 +17,6 @@ def process_new_admin(message, bot):
     except Exception as e:
         add_log(f"Exception in process_new_admin: {e}")
 
+
 def process_ping(message, bot):
     bot.send_message(message.chat.id, "Ping!")

@@ -1,3 +1,5 @@
+from config.admin import ADMIN_KEY
+from config.commands import commands_list
 from config.dotenv import (
     DATABASE_URL,
     BOT_TOKEN,
@@ -7,4 +9,3 @@ from config.dotenv import (
     BACKUP_CHANNEL_ID,
     ARCHIVE_CHANNEL_ID
 )
-from config.commands import commands_list
