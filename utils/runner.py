@@ -7,12 +7,10 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 import schedule
-from dotenv import load_dotenv
 from telebot import TeleBot
 
+from config import DATABASE_URL, LOG_CHANNEL_ID, TOKEN_LOGGING
 from utils.logger import add_log
-
-load_dotenv(os.getenv("TG_BOT_ENV"))
 
 
 def backup_command(backup_file, db_name, db_user):
@@ -22,8 +20,7 @@ def backup_command(backup_file, db_name, db_user):
 
 
 def backup_database(bot):
-    db_url = os.getenv("DATABASE_URL")
-    url_parts = urlparse(db_url)
+    url_parts = urlparse(DATABASE_URL)
     database = {
         'username': url_parts.username,
         'password': url_parts.password,
@@ -52,14 +49,13 @@ def backup_database(bot):
 
 
 def send_backup_to_channel(backup_file):
-    logging_bot = TeleBot(os.getenv("TOKEN_LOGGING"))
-    log_channel_id = os.getenv("LOG_CHANNEL_ID")
+    logging_bot = TeleBot(TOKEN_LOGGING)
     try:
         with open(backup_file, "rb") as file:
             logging_bot.send_document(os.getenv("BACKUP_CHANNEL_ID"), file)
-        logging_bot.send_message(log_channel_id, f"Backup sent successfully: {backup_file}")
+        logging_bot.send_message(LOG_CHANNEL_ID, f"Backup sent successfully: {backup_file}")
     except Exception as e:
-        logging_bot.send_message(log_channel_id, f"Error in sending Backup - {e}")
+        logging_bot.send_message(LOG_CHANNEL_ID, f"Error in sending Backup - {e}")
 
 
 def run_scheduler():

@@ -1,17 +1,16 @@
 import logging
 import os
 
-from dotenv import load_dotenv
 from telebot import TeleBot
 
-load_dotenv(os.getenv("TG_BOT_ENV"))
+from config import LOG_CHANNEL_ID, BOT_TOKEN, TOKEN_LOGGING, LOG_DIR
 
 
 def add_log(the_error):
-    log_channel_id = str(os.getenv("LOG_CHANNEL_ID"))
-    logging_bot = TeleBot(os.getenv("TOKEN_LOGGING"))
-    username = TeleBot(os.getenv("BOT_TOKEN")).get_me().username
-    filename = os.path.join(os.path.dirname(os.getenv("LOG_DIR")), f"{username}_logs.log")
+    log_channel_id = str(LOG_CHANNEL_ID)
+    logging_bot = TeleBot(TOKEN_LOGGING)
+    username = TeleBot(BOT_TOKEN).get_me().username
+    filename = os.path.join(os.path.dirname(LOG_DIR), f"{username}_logs.log")
     logging.basicConfig(
         filename=filename, level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
     )

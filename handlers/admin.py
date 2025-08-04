@@ -1,6 +1,6 @@
 from telebot.types import BotCommand
 
-from config.commands import commands_list
+from config import commands_list
 from functions.admin import (
     process_new_admin,
     process_ping,

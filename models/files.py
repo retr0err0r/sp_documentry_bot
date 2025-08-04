@@ -12,8 +12,8 @@ class File(Base):
     file_type = Column(String(3))
     description = Column(Text)
 
-    telegram_msg_id = Column(BigInteger, nullable=True)
-    telegram_chat_id = Column(BigInteger, nullable=True)
+    telegram_msg_id = Column(BigInteger)
+    telegram_chat_id = Column(BigInteger)
 
     def __repr__(self):
         return f"<File {self.url_link}>"

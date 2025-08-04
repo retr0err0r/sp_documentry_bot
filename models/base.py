@@ -1,28 +1,14 @@
-import os
-from contextlib import contextmanager
-
 import psycopg2
-from dotenv import load_dotenv
 from psycopg2 import sql
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+from config import DATABASE_URL
 from utils.logger import add_log
 
-load_dotenv(os.getenv("TG_BOT_ENV"))
-DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autoflush=True, bind=engine)
+get_session = sessionmaker(autoflush=True, bind=engine)
 Base = declarative_base()
-
-
-@contextmanager
-def get_session():
-    ss = SessionLocal()
-    try:
-        yield ss
-    finally:
-        ss.close()
 
 
 def init_db():
