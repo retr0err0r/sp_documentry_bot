@@ -1,16 +1,7 @@
-from telebot.types import BotCommand, Message
+from telebot.types import Message
 
-from config import commands_list
-from functions.default import process_start
+from functions.default import process_start, process_help
 from utils.wrappers import check_username
-
-
-def add_default_commands_to_bot():
-    commands_list.extend(
-        [
-            BotCommand(command="/start", description="🤖 start the bot")
-        ]
-    )
 
 
 def register_start(bot):
@@ -20,6 +11,13 @@ def register_start(bot):
         process_start(bot, message)
 
 
+def register_help(bot):
+    @bot.message_handler(commands=["help"])
+    @check_username()
+    def handle_help(message: Message):
+        process_help(bot, message)
+
+
 def default_commands_handler(bot):
-    add_default_commands_to_bot()
     register_start(bot)
+    register_help(bot)

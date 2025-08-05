@@ -9,7 +9,7 @@ def add_case_commands_to_bot():
     commands_list.extend(
         [
             BotCommand(command="/add_case", description="📑  Add new case"),
-            BotCommand(command="/my_cases", description="📑 Get your cases"),
+            BotCommand(command="/cases", description="📑 Get last cases"),
             BotCommand(command="/search_case", description="📑 Find case by criteria"),
         ]
     )
@@ -24,7 +24,7 @@ def register_add_case(bot):
 
 
 def register_user_case(bot):
-    @bot.message_handler(commands=["my_cases"])
+    @bot.message_handler(commands=["cases"])
     @check_username()
     def handle_user_case(message: Message):
         process_user_case(message, bot)
