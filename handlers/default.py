@@ -8,14 +8,14 @@ def register_start(bot):
     @bot.message_handler(commands=["start"])
     @check_username()
     def handle_start(message: Message):
-        process_start(bot, message)
+        process_start(message, bot)
 
 
 def register_help(bot):
     @bot.message_handler(commands=["help"])
     @check_username()
     def handle_help(message: Message):
-        process_help(bot, message)
+        process_help(message, bot)
 
 
 def default_commands_handler(bot):

@@ -4,69 +4,26 @@ from telebot.types import Message
 from models import get_session, User, Document
 from utils.checkers import is_admin
 
-case_data = {}
 
 def process_add_case(message: Message, bot: TeleBot):
-    if not is_admin(str(message.from_user.id)):
-        bot.reply_to(message, "فقط ادمین‌ها می‌توانند پرونده ثبت کنند.")
-        return
     bot.reply_to(message, "یوزرنیم مشتری را وارد کنید:")
-    case_data[message.chat.id] = {}
     bot.register_next_step_handler(message, get_username)
-
-
-def process_user_case(message: Message, bot: TeleBot):
-    tg_id = str(message.from_user.id)
-    session = get_session()
-    with session() as db:
-        user = db.query(User).filter_by(tg_id=tg_id).first()
-        if not user:
-            bot.reply_to(message, "ابتدا باید توسط مدیر ثبت شوید.")
-            return
-        docs = db.query(Document).filter_by(client_id=user.id).order_by(Document.id.desc()).limit(5).all()
-        if not docs:
-            bot.reply_to(message, "شما هیچ پرونده‌ای ندارید.")
-            return
-        for doc in docs:
-            text = (
-                f"📄 پرونده #{doc.id}\n"
-                f"کوتیج: {doc.cotej_number}\n"
-                f"بوکینگ: {doc.booking_number}\n"
-                f"تعداد کانتینر: {doc.container_quantity}\n"
-                f"وضعیت: {doc.document_status}\n"
-            )
-            bot.send_message(message.chat.id, text)
-
-
-def process_search_case(message: Message, bot: TeleBot):
-    if not is_admin(str(message.from_user.id)):
-        bot.reply_to(message, "فقط ادمین‌ها مجاز به جستجو هستند.")
-        return
-    bot.reply_to(message, "چه چیزی می‌خواهید جستجو کنید؟ (cotej_number, booking_number, username, document_id)")
-    bot.register_next_step_handler(message, get_search_key)
 
 
 def get_username(message: Message, bot: TeleBot):
     session = get_session()
-    with session() as db:
-        username = message.text.strip().lstrip("@")
-        user = db.query(User).filter_by(username=username).first()
-        if not user:
-            bot.reply_to(message, "مشتری یافت نشد.")
-            return
-        case_data[message.chat.id]['client_id'] = user.id
-        bot.reply_to(message, "شماره کوتیج را وارد کنید:")
-        bot.register_next_step_handler(message, get_cotej)
-
-
-def get_cotej(message: Message, bot: TeleBot):
-    case_data[message.chat.id]['cotej_number'] = message.text
+    username = message.text.strip().lstrip("@")
+    user = session.query(User).filter_by(username=username).first()
+    if not user:
+        bot.reply_to(message, "مشتری یافت نشد.")
+        return
+    new_doc = Document(client_id=user.id)
     bot.reply_to(message, "شماره بوکینگ را وارد کنید:")
-    bot.register_next_step_handler(message, get_booking)
+    bot.register_next_step_handler(message, get_booking, new_doc, bot)
 
 
-def get_booking(message: Message, bot: TeleBot):
-    case_data[message.chat.id]['booking_number'] = message.text
+def get_booking(message: Message, new_doc: Document, bot: TeleBot):
+    new_doc.booking_number = message.text
     bot.reply_to(message, "تعداد کانتینر:")
     bot.register_next_step_handler(message, get_container_quantity)
 
@@ -129,6 +86,37 @@ def get_payment_status(message: Message, bot: TeleBot):
         db.add(doc)
         db.commit()
     bot.reply_to(message, "پرونده با موفقیت ثبت شد.")
+
+
+def process_user_case(message: Message, bot: TeleBot):
+    tg_id = str(message.from_user.id)
+    session = get_session()
+    with session() as db:
+        user = db.query(User).filter_by(tg_id=tg_id).first()
+        if not user:
+            bot.reply_to(message, "ابتدا باید توسط مدیر ثبت شوید.")
+            return
+        docs = db.query(Document).filter_by(client_id=user.id).order_by(Document.id.desc()).limit(5).all()
+        if not docs:
+            bot.reply_to(message, "شما هیچ پرونده‌ای ندارید.")
+            return
+        for doc in docs:
+            text = (
+                f"📄 پرونده #{doc.id}\n"
+                f"کوتیج: {doc.cotej_number}\n"
+                f"بوکینگ: {doc.booking_number}\n"
+                f"تعداد کانتینر: {doc.container_quantity}\n"
+                f"وضعیت: {doc.document_status}\n"
+            )
+            bot.send_message(message.chat.id, text)
+
+
+def process_search_case(message: Message, bot: TeleBot):
+    if not is_admin(str(message.from_user.id)):
+        bot.reply_to(message, "فقط ادمین‌ها مجاز به جستجو هستند.")
+        return
+    bot.reply_to(message, "چه چیزی می‌خواهید جستجو کنید؟ (cotej_number, booking_number, username, document_id)")
+    bot.register_next_step_handler(message, get_search_key)
 
 
 def get_search_key(message: Message, bot: TeleBot):

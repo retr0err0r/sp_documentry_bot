@@ -33,9 +33,9 @@ def check_admin(bot):
                 user = session.query(User).filter_by(tg_id=chat_id).first()
                 if user and user.role == "admin":
                     return handler(message)
-                text = "You must log in to the bot first ⛔️\nAsk the admin to add you."
+                text = "نقش شما در بات ثبت نشده است.\nبرای استفاده از بات مذکور لطفا با بخش پشتیبانی ارتباط حاصل فرمایید.\nبا تشکر."
                 if user:
-                    text = "You are not admin, and you can't access this command ⛔️"
+                    text = "این دستور فقط برای ادمین ها قابل دسترسی است.⛔"
                 bot.send_message(chat_id, text)
             except Exception as e:
                 add_log(f"Exception in check_admin: {e}")
