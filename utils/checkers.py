@@ -15,7 +15,7 @@ def is_admin(tg_id: str) -> bool:
 
 def cancel_flow(message: Message, bot: TeleBot) -> bool:
     if message.text.lower() == "/cancel":
-        bot.reply_to(message, "عملیات لغو شد.")
+        bot.reply_to(message, "عملیات لغو شد.", reply_markup=None)
         return True
     return False
 
