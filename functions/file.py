@@ -1,43 +1,33 @@
 from telebot import TeleBot
-from telebot.types import Message, Document
+from telebot.types import Message
 
 from config import ARCHIVE_CHANNEL_ID
-from models import get_session, File, Document as CaseDocument, User
-from utils.checkers import is_admin
+from models import get_session, File, User, Document
 
 upload_context = {}
 
 
 def process_upload_file(message: Message, bot: TeleBot):
-    if not is_admin(str(message.from_user.id)):
-        bot.reply_to(message, "دسترسی محدود به ادمین‌هاست.")
-        return
     bot.reply_to(message, "شماره پرونده (document_id) را وارد کنید:")
     upload_context[message.chat.id] = {}
-    bot.register_next_step_handler(message, ask_doc_id)
-
-
-def process_show_files(message: Message, bot: TeleBot):
-    bot.reply_to(message, "شماره پرونده (document_id) را وارد کنید:")
-    bot.register_next_step_handler(message, process_doc_id)
+    bot.register_next_step_handler(message, ask_doc_id, bot)
 
 
 def ask_doc_id(message: Message, bot: TeleBot):
     try:
         doc_id = int(message.text.strip())
         session = get_session()
-        with session() as db:
-            doc = db.query(CaseDocument).filter_by(id=doc_id).first()
-            if not doc:
-                bot.reply_to(message, "پرونده‌ای با این شماره یافت نشد.")
-                return
-            upload_context[message.chat.id]['document_id'] = doc_id
+        doc = session.query(Document).filter_by(id=doc_id).first()
+        if not doc:
+            bot.reply_to(message, "پرونده‌ای با این شماره یافت نشد.")
+            return
+        upload_context[message.chat.id]['document_id'] = doc_id
     except ValueError:
         bot.reply_to(message, "شماره پرونده باید عدد باشد.")
         return
 
     bot.reply_to(message, "اکنون فایل خود را ارسال کنید:")
-    bot.register_next_step_handler(message, receive_file)
+    bot.register_next_step_handler(message, receive_file, bot)
 
 
 def receive_file(message: Message, bot: TeleBot):
@@ -47,14 +37,8 @@ def receive_file(message: Message, bot: TeleBot):
 
     upload_context[message.chat.id]['file'] = message.document
     upload_context[message.chat.id]['file_id'] = message.document.file_id
-    bot.reply_to(message, "نوع فایل را وارد کنید (مثلاً: Invoice، Packing List و ...):")
-    bot.register_next_step_handler(message, get_file_type)
-
-
-def get_file_type(message: Message, bot: TeleBot):
-    upload_context[message.chat.id]['file_type'] = message.text
     bot.reply_to(message, "توضیح اختیاری برای فایل:")
-    bot.register_next_step_handler(message, get_description)
+    bot.register_next_step_handler(message, get_description, bot)
 
 
 def get_description(message: Message, bot: TeleBot):
@@ -63,10 +47,12 @@ def get_description(message: Message, bot: TeleBot):
     file = data['file']
 
     # ارسال فایل به کانال آرشیو
+    doc_id = data.get('document_id', "نامشخص")
+    file_type = data.get('file_type', "نامشخص")
     sent = bot.send_document(
         ARCHIVE_CHANNEL_ID,
         file.file_id,
-        caption=f"📎 فایل مرتبط با پرونده #{data['document_id']}\nنوع: {data['file_type']}"
+        caption=f"📎 فایل مرتبط با پرونده #{doc_id}\nنوع: {file_type}"
     )
 
     # ذخیره در دیتابیس
@@ -74,7 +60,7 @@ def get_description(message: Message, bot: TeleBot):
     file_record = File(
         document_id=data['document_id'],
         url_link=f"https://t.me/c/{str(ARCHIVE_CHANNEL_ID).lstrip('-100')}/{sent.message_id}",
-        file_type=data['file_type'],
+        file_type=data.get('file_type', "N/A"),
         description=description,
         telegram_msg_id=sent.message_id,
         telegram_chat_id=sent.chat.id,
@@ -83,6 +69,11 @@ def get_description(message: Message, bot: TeleBot):
     session.commit()
 
     bot.reply_to(message, "فایل با موفقیت ذخیره شد.")
+
+
+def process_show_files(message: Message, bot: TeleBot):
+    bot.reply_to(message, "شماره پرونده (document_id) را وارد کنید:")
+    bot.register_next_step_handler(message, process_doc_id, bot)
 
 
 def process_doc_id(message: Message, bot: TeleBot):
