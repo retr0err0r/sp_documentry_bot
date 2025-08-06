@@ -9,7 +9,7 @@ from utils.checkers import is_admin, cancel_flow
 
 def process_add_case(message: Message, bot: TeleBot):
     bot.reply_to(message, "یوزرنیم مشتری را وارد کنید:\n\n(برای لغو روی /cancel کلیک کنید)")
-    bot.register_next_step_handler(message, get_username)
+    bot.register_next_step_handler(message, get_username, bot)
 
 
 def get_username(message: Message, bot: TeleBot):
@@ -101,7 +101,7 @@ def get_document_status(message: Message, new_doc: Document, bot: TeleBot):
         return
     new_doc.document_status = message.text
     save_document_in_db(new_doc)
-    bot.reply_to(message, "پرونده با موفقیت ثبت شد.")
+    bot.reply_to(message, "پرونده با موفقیت ثبت شد.", reply_markup=None)
 
 
 def save_document_in_db(document: Document):
@@ -111,6 +111,9 @@ def save_document_in_db(document: Document):
 
 
 def process_user_case(message: Message, bot: TeleBot):
+    """
+    TODO: returned cases based on user role (admin or client)
+    """
     tg_id = str(message.from_user.id)
     session = get_session()
     user = session.query(User).filter_by(tg_id=tg_id).first()
@@ -140,7 +143,7 @@ def process_search_case(message: Message, bot: TeleBot):
         bot.reply_to(message, "فقط ادمین‌ها مجاز به جستجو هستند.")
         return
     bot.reply_to(message, "چه چیزی می‌خواهید جستجو کنید؟ (cotej_number, booking_number, username, document_id)")
-    bot.register_next_step_handler(message, get_search_key)
+    bot.register_next_step_handler(message, get_search_key, bot)
 
 
 def get_search_key(message: Message, bot: TeleBot):

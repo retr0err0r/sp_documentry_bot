@@ -20,7 +20,7 @@ init_db()
 admin_commands_handler(bot)
 # payment_commands_handler(bot)
 # file_commands_handler(bot)
-# case_commands_handler(bot)
+case_commands_handler(bot)
 client_commands_handler(bot)
 default_commands_handler(bot)
 
