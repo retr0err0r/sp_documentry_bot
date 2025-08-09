@@ -22,6 +22,7 @@ class Document(Base):
 
     document_status = Column(Text)
     payment_status = Column(Text)
+    description = Column(Text)
 
     compartment_name = Column(Text)
     flexis_supplier = Column(Text)

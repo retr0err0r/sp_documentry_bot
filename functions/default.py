@@ -1,7 +1,7 @@
 from telebot import TeleBot
+from telebot.types import Message
 
 from models import get_session, User
-from telebot.types import Message
 
 
 def process_start(message: Message, bot: TeleBot):

@@ -10,6 +10,12 @@ from handlers.payment import payment_commands_handler
 from models.base import init_db
 from utils.runner import runner
 
+# Uncomment below lines for activate proxy
+# from telebot import apihelper
+# apihelper.proxy = {
+#     'http': 'http://127.0.0.1:10808',
+# }
+
 # Initialize bot
 bot = TeleBot(BOT_TOKEN)
 

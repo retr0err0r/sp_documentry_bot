@@ -5,6 +5,7 @@ from telebot.types import Message
 from models import get_session, User, Document
 from utils.buttons import create_reply_buttons
 from utils.checkers import is_admin, cancel_flow
+from utils.logger import add_log
 
 
 def process_add_case(message: Message, bot: TeleBot):
@@ -111,31 +112,35 @@ def save_document_in_db(document: Document):
 
 
 def process_user_case(message: Message, bot: TeleBot):
-    """
-    TODO: returned cases based on user role (admin or client)
-    """
-    tg_id = str(message.from_user.id)
-    session = get_session()
-    user = session.query(User).filter_by(tg_id=tg_id).first()
-    if not user:
-        bot.reply_to(message, "ابتدا باید توسط مدیر ثبت شوید.")
-        return
-    docs = session.query(Document).filter_by(client_id=user.id).order_by(Document.id.desc()).limit(10).all()
-    if not docs:
-        bot.reply_to(message, "شما هیچ پرونده‌ای ندارید.")
-        return
-    text = "\n\n-----------------------\n\n".join(
-        [
-            (
-                f"📄 پرونده #{doc.id}\n"
-                f"کوتیج: {doc.cotej_number}\n"
-                f"بوکینگ: {doc.booking_number}\n"
-                f"تعداد کانتینر: {doc.container_quantity}\n"
-                f"وضعیت: {doc.document_status}\n"
-            ) for doc in docs
-        ]
-    )
-    bot.send_message(message.chat.id, text)
+    try:
+        tg_id = str(message.from_user.id)
+        session = get_session()
+        args = message.text.split()
+        if len(args) < 2:
+            user = session.query(User).filter_by(tg_id=tg_id).first()
+        else:
+            user = session.query(User).filter_by(username=args[1].lstrip("@")).first()
+        if not user:
+            bot.reply_to(message, "ابتدا باید توسط مدیر ثبت شوید.")
+            return
+        docs = session.query(Document).filter_by(client_id=user.id).order_by(Document.id.desc()).limit(10).all()
+        if not docs:
+            bot.reply_to(message, "پرونده‌ای یافت نشد.")
+            return
+        text = "\n\n-----------------------\n\n".join(
+            [
+                (
+                    f"📄 پرونده #{doc.id}\n"
+                    f"کوتیج: {doc.cotej_number}\n"
+                    f"بوکینگ: {doc.booking_number}\n"
+                    f"تعداد کانتینر: {doc.container_quantity}\n"
+                    f"وضعیت: {doc.document_status}\n"
+                ) for doc in docs
+            ]
+        )
+        bot.send_message(message.chat.id, text)
+    except Exception as e:
+        add_log(f"Exception in process_user_case: {e}")
 
 
 def process_search_case(message: Message, bot: TeleBot):

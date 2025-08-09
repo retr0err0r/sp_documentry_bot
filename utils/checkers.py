@@ -3,8 +3,7 @@ import re
 from telebot import TeleBot
 from telebot.types import Message
 
-from models.base import get_session
-from models.users import User
+from models import get_session, User
 
 
 def is_admin(tg_id: str) -> bool:
