@@ -3,12 +3,13 @@ from psycopg2 import sql
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy_utils import database_exists, create_database
+
 from config import DATABASE_URL
 from utils.logger import add_log
 
 engine = create_engine(DATABASE_URL)
-get_session = sessionmaker(autoflush=True, bind=engine)
 Base = declarative_base()
+get_session = sessionmaker(autoflush=True, bind=engine)
 
 
 def init_db():

@@ -1,18 +1,8 @@
-from telebot.types import BotCommand, Message
+from telebot.types import Message
 
-from config import commands_list
 from functions.client import process_add_client, process_client_stats, process_list_clients
 from utils.wrappers import check_username, check_admin
 
-
-def add_client_commands_to_bot():
-    commands_list.extend(
-        [
-            BotCommand(command="/add_client", description="👔 Add new Client"),
-            BotCommand(command="/list_clients", description="👔 List all Clients"),
-            BotCommand(command="/client_stats", description="👔 Get Client Stats")
-        ]
-    )
 
 
 def register_list_clients(bot):
@@ -39,7 +29,6 @@ def register_client_stats(bot):
 
 
 def client_commands_handler(bot):
-    add_client_commands_to_bot()
     register_add_client(bot)
     register_list_clients(bot)
     register_client_stats(bot)

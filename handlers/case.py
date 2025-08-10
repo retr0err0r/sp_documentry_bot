@@ -1,18 +1,8 @@
-from telebot.types import BotCommand, Message
+from telebot.types import Message
 
-from config import commands_list
 from functions.case import process_add_case, process_user_case, process_search_case
 from utils.wrappers import check_username, check_admin
 
-
-def add_case_commands_to_bot():
-    commands_list.extend(
-        [
-            BotCommand(command="/add_case", description="📑  Add new case"),
-            BotCommand(command="/cases", description="📑 Get last cases"),
-            BotCommand(command="/search_case", description="📑 Find case by criteria"),
-        ]
-    )
 
 
 def register_add_case(bot):
@@ -37,7 +27,6 @@ def register_search_case(bot):
 
 
 def case_commands_handler(bot):
-    add_case_commands_to_bot()
     register_add_case(bot)
     register_user_case(bot)
     register_search_case(bot)
